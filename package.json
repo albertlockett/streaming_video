@@ -92,6 +92,7 @@
     "morgan": "1.9.1",
     "njwt": "^1.0.0",
     "nnode": "^0.3.3",
+    "office-ui-fabric-react": "^7.98.1",
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",

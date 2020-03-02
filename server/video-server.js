@@ -1,4 +1,11 @@
-require('dotenv').config();
+const dotenv = require('dotenv');
+const { DOTENVPATH } = process.env;
+if (DOTENVPATH) {
+  dotenv.config({ path: DOTENVPATH });
+} else {
+  dotenv.config();
+}
+
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const express = require('express');
@@ -27,7 +34,42 @@ function retrieveFile(path, res) {
       return res.status(400).send({ success: false, err });
     }
 
+    // console.log(data);
     return res.send(data.Body);
+  });
+}
+
+function retreiveFileList(res) {
+  const getParams = {
+    Bucket: 'lockettflix.ca',
+  };
+
+  s3.listObjects(getParams, (err, data) => {
+    if (err) {
+      return res.status(400).send({ success: false, err });
+    }
+
+    // console.log(data);
+    // const body = data.Body;
+    // console.log(body);
+    // console.log(Object.keys(body))
+    const fileList = data.Contents;
+    const folders = new Set();
+    fileList.forEach(({ Key }) => {
+      console.log(Key.split('/'));
+      console.log(Key.split('/')[0]);
+      folders.add(Key.split('/')[0]);
+    });
+
+    console.log(folders);
+
+    const fileList2 = [];
+    folders.forEach(x => {
+      console.log(x);
+      fileList2.push(x);
+    });
+    console.log(fileList2.join('\n'));
+    return res.send(fileList2.join('\n'));
   });
 }
 
@@ -55,7 +97,7 @@ function setup(app) {
     client_secret: process.env.OKTA_CLIENT_SECRET,
     redirect_uri: `${process.env.HOST_URL}/authorization-code/callback`,
     scope: 'openid profile',
-    appBaseUrl: 'http://localhost:3000',
+    appBaseUrl: `${process.env.HOST_URL}`,
     routes: {
       login: {
         path: '/login',
@@ -93,6 +135,10 @@ function setup(app) {
 
   app.get('/get_file/**', oidc.ensureAuthenticated(), (req, res) => {
     retrieveFile(req.path, res);
+  });
+
+  app.get('/list_videos', oidc.ensureAuthenticated(), (req, res) => {
+    retreiveFileList(res);
   });
 }
 
