@@ -15,6 +15,7 @@ const expressSession = require('express-session');
 const { ExpressOIDC } = require('@okta/oidc-middleware');
 const okta = require('@okta/okta-sdk-nodejs');
 const AWS = require('aws-sdk');
+const dadPage = require('./dad-page');
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -49,26 +50,16 @@ function retreiveFileList(res) {
       return res.status(400).send({ success: false, err });
     }
 
-    // console.log(data);
-    // const body = data.Body;
-    // console.log(body);
-    // console.log(Object.keys(body))
     const fileList = data.Contents;
     const folders = new Set();
     fileList.forEach(({ Key }) => {
-      console.log(Key.split('/'));
-      console.log(Key.split('/')[0]);
       folders.add(Key.split('/')[0]);
     });
 
-    console.log(folders);
-
     const fileList2 = [];
     folders.forEach(x => {
-      console.log(x);
       fileList2.push(x);
     });
-    console.log(fileList2.join('\n'));
     return res.send(fileList2.join('\n'));
   });
 }
@@ -133,13 +124,44 @@ function setup(app) {
       });
   });
 
-  app.get('/get_file/**', oidc.ensureAuthenticated(), (req, res) => {
-    retrieveFile(req.path, res);
-  });
+  app.get(
+    '/get_file/**',
+    // oidc.ensureAuthenticated(),
+    (req, res) => {
+      retrieveFile(req.path, res);
+    },
+  );
 
-  app.get('/list_videos', oidc.ensureAuthenticated(), (req, res) => {
-    retreiveFileList(res);
-  });
+  app.get(
+    '/list_videos',
+    // oidc.ensureAuthenticated(),
+    (req, res) => {
+      const videoList = dadPage.getVideoList();
+      console.log(videoList);
+      return res.json(videoList['/']);
+    },
+  );
+
+  app.get(
+    '/list_videos/**',
+    // oidc.ensureAuthenticated(),
+    async (req, res) => {
+      const path = req.path.replace('/list_videos', '');
+      const videoList = dadPage.getVideoList();
+      if (videoList[path]) {
+        return res.json(videoList[path]);
+        // eslint-disable-next-line no-else-return
+      } else {
+        console.log({ path })
+        await dadPage.fetchVideosAtPath(path);
+        const videoList = dadPage.getVideoList();
+        console.log(videoList)
+        return res.json(videoList[path]);
+        // console.log("TODO find it");
+        // res.send(404);
+      }
+    },
+  );
 }
 
 module.exports = setup;

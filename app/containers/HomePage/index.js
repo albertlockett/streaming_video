@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import VideoPlayer from 'components/VideoPlayer';
 
@@ -18,13 +18,38 @@ const VideoListContainer = styled.div`
   font-size: 18px;
 `;
 
+function VideoLink({ video, setChosenVideo, path, setPath }) {
+  const filename =
+    video.type === 'dir' ? `/${video.fileName}` : `${video.fileName}`;
+  return (
+    <VideoListChoice
+      key={video}
+      onClick={() => {
+        if (video.type === 'dir') {
+          setPath(
+            path.endsWith('/')
+              ? path + video.fileName
+              : `${path}/${video.fileName}`,
+          );
+        } else {
+          setChosenVideo(video);
+        }
+      }}
+    >
+      {filename}
+    </VideoListChoice>
+  );
+}
+
 export default function HomePage() {
   const [needToLogin, setNeedToLogin] = useState(false);
   const [videoList, setVideoList] = useState(null);
   const [chosenVideo, setChosenVideo] = useState(null);
+  const [path, setPath] = useState('/');
 
   const listVideos = () => {
-    fetch('/list_videos', {
+    setVideoList(null)
+    fetch(`/list_videos${path}`, {
       credentials: 'include',
     })
       .then(
@@ -40,15 +65,25 @@ export default function HomePage() {
         },
       )
       .then(r => {
-        if (r != null) {
-          setVideoList(r.split('\n'));
-        }
+        console.log(r);
+        const videos = JSON.parse(r);
+        videos.sort((a, b) => {
+          if (a.type === 'dir' && b.type !== 'dir') {
+            return -1;
+          }
+          if (a.type !== 'dir' && b.type === 'dir') {
+            return 1;
+          }
+          return 0;
+        });
+        console.log(videos);
+        setVideoList(videos);
       });
   };
 
-  if (videoList === null) {
+  useEffect(() => {
     listVideos();
-  }
+  }, [path]);
 
   return (
     <Fragment>
@@ -61,24 +96,29 @@ export default function HomePage() {
           {videoList !== null && chosenVideo === null && (
             <Fragment>
               <div>Choose video</div>
+              {path !== '/' && (
+                <Fragment>
+                  <VideoListChoice onClick={() => setPath('/')}>
+                    ..
+                  </VideoListChoice>
+                  <br />
+                </Fragment>
+              )}
               {videoList.map(video => (
                 // eslint-disable-next-line
                 <Fragment>
-                  <VideoListChoice
-                    key={video}
-                    onClick={() => {
-                      setChosenVideo(video);
-                    }}
-                  >
-                    {video}
-                  </VideoListChoice>
+                  <VideoLink
+                    video={video}
+                    setChosenVideo={setChosenVideo}
+                    path={path}
+                    setPath={setPath}
+                  />
                   <br />
                 </Fragment>
               ))}
             </Fragment>
           )}
         </div>
-        
         <div>
           {chosenVideo != null && (
             // eslint-disable-next-line

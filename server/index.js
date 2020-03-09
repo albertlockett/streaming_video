@@ -19,6 +19,9 @@ const app = express();
 const setupvideo = require('./video-server');
 setupvideo(app);
 
+const dadSite = require('./dad-page');
+dadSite.init();
+
 // In production we need to pass these values in instead of relying on webpack
 setup(app, {
   outputPath: resolve(process.cwd(), 'build'),
