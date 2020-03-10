@@ -11,7 +11,7 @@ import { Helmet } from 'react-helmet';
 import styled from 'styled-components';
 import { Switch, Route } from 'react-router-dom';
 
-import HomePage from 'containers/HomePage';
+import HomePage from 'containers/HomePageCool';
 
 import GlobalStyle from '../../global-styles';
 
