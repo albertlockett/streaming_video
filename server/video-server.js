@@ -16,6 +16,7 @@ const { ExpressOIDC } = require('@okta/oidc-middleware');
 const okta = require('@okta/okta-sdk-nodejs');
 const AWS = require('aws-sdk');
 const dadPage = require('./dad-page');
+const s3store = require('./s3-store');
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -137,7 +138,13 @@ function setup(app) {
     // oidc.ensureAuthenticated(),
     (req, res) => {
       const videoList = dadPage.getVideoList();
-      console.log(videoList);
+      const s3FileObjects = s3store.getAllFileObjects();
+      videoList['/'].forEach(video => {
+        if (video.type !== 'dir') {
+          // eslint-disable-next-line no-param-reassign
+          video.synced = undefined !== s3FileObjects[`${video.fileName}/`];
+        }
+      });
       return res.json(videoList['/']);
     },
   );
@@ -148,17 +155,30 @@ function setup(app) {
     async (req, res) => {
       const path = req.path.replace('/list_videos', '');
       const videoList = dadPage.getVideoList();
+      const s3FileObjects = s3store.getAllFileObjects();
+
+      const pathNoPrefix = path.replace('/', '');
       if (videoList[path]) {
-        return res.json(videoList[path]);
+        const vids = videoList[path];
+        vids.forEach(video => {
+          if (video.type !== 'dir') {
+            // eslint-disable-next-line no-param-reassign
+            video.synced = undefined !== s3FileObjects[`${pathNoPrefix}/${video.fileName}/`];
+          }
+        });
+        return res.json(vids);
         // eslint-disable-next-line no-else-return
       } else {
-        console.log({ path })
         await dadPage.fetchVideosAtPath(path);
         const videoList = dadPage.getVideoList();
-        console.log(videoList)
-        return res.json(videoList[path]);
-        // console.log("TODO find it");
-        // res.send(404);
+        const vids = videoList[path];
+        vids.forEach(video => {
+          if (video.type !== 'dir') {
+            // eslint-disable-next-line no-param-reassign
+            video.synced = undefined !== s3FileObjects[`${pathNoPrefix}/${video.fileName}/`];
+          }
+        });
+        return res.json(vids);
       }
     },
   );

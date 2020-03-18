@@ -39,7 +39,7 @@ function parseVideoListV2(body) {
       fileType: ext,
     });
   }
-  return vids
+  return vids;
 }
 
 function parseVideoList(bodyRaw) {
@@ -106,11 +106,12 @@ async function init() {
     });
     const rootVids = parseVideoList(videoListRaw);
     videoList['/'] = rootVids;
-    console.log(videoList);
   } catch (e) {
     console.error(e);
     throw e;
   }
+
+  console.log({ videoCreds, videoURL })
 }
 
 module.exports = {

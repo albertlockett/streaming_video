@@ -22,6 +22,9 @@ setupvideo(app);
 const dadSite = require('./dad-page');
 dadSite.init();
 
+const s3store = require('./s3-store');
+s3store.init();
+
 // In production we need to pass these values in instead of relying on webpack
 setup(app, {
   outputPath: resolve(process.cwd(), 'build'),
