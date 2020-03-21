@@ -62,7 +62,7 @@ export default class VideoPlayer extends Component {
       hls.attachMedia(this.video.current);
       hls.on(Hls.Events.MEDIA_ATTACHED, () => {
         console.log('video and hls.js are now bound together !');
-        hls.loadSource('/get_file/' + this.props.video + '/master.m3u8');
+        hls.loadSource('/get_file/__dir__' + this.props.video + '/prog_index.m3u8');
         hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
           console.log(
             `manifest loaded, found ${data.levels.length} quality level`,

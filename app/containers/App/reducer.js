@@ -8,7 +8,12 @@
  */
 
 import produce from 'immer';
-import { LOAD_REPOS_SUCCESS, LOAD_REPOS, LOAD_REPOS_ERROR } from './constants';
+import {
+  LOAD_REPOS_SUCCESS,
+  LOAD_REPOS,
+  LOAD_REPOS_ERROR,
+  SET_CHOSEN_VIDEO,
+} from './constants';
 
 // The initial state of the App
 export const initialState = {
@@ -18,12 +23,17 @@ export const initialState = {
   userData: {
     repositories: false,
   },
+  video: null,
 };
 
 /* eslint-disable default-case, no-param-reassign */
 const appReducer = (state = initialState, action) =>
   produce(state, draft => {
     switch (action.type) {
+      case SET_CHOSEN_VIDEO:
+        draft.video = action.video;
+        break;
+
       case LOAD_REPOS:
         draft.loading = true;
         draft.error = false;

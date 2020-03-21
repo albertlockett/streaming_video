@@ -139,6 +139,7 @@ function setup(app) {
     (req, res) => {
       const videoList = dadPage.getVideoList();
       const s3FileObjects = s3store.getAllFileObjects();
+      console.log(s3FileObjects);
       videoList['/'].forEach(video => {
         if (video.type !== 'dir') {
           // eslint-disable-next-line no-param-reassign

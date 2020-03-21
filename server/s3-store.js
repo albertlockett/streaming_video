@@ -8,7 +8,7 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
-const allFileObjects = {};
+let allFileObjects = {};
 
 const getAllFileObjects = () => allFileObjects;
 
@@ -16,6 +16,7 @@ const refreshAllFileObjects = async (path = '') => {
   const params = {
     Bucket: 'lockettflix.ca',
     Prefix: '__dir__',
+    Delimiter: '/',
   };
   const objects = await new Promise((resolve, reject) => {
     s3.listObjectsV2(params, (err, data) => {
@@ -25,13 +26,23 @@ const refreshAllFileObjects = async (path = '') => {
       resolve(data);
     });
   });
-  objects.Contents.forEach(obj => {
-    const effectiveKey = obj.Key.split('/').map(segment =>
+  const nextfileObjects = {};
+  objects.CommonPrefixes.forEach(({ Prefix }) => {
+    const effectiveKey = Prefix.split('/').map(segment =>
       segment.replace(/^__dir__/, ''),
     );
-    allFileObjects[effectiveKey.join('/')] = {};
+    nextfileObjects[effectiveKey.join('/')] = {};
   });
+
+  allFileObjects = nextfileObjects;
 };
+
+setInterval(async () => {
+  // for (const key of Object.keys(allFileObjects)) {
+  console.log('refetching file objects:');
+  refreshAllFileObjects();
+  // }
+}, 5000);
 
 async function init() {
   await refreshAllFileObjects();

@@ -1,8 +1,27 @@
 import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { push } from 'connected-react-router';
 
-import { Container, Menu, Table } from 'semantic-ui-react';
+import { Menu, Table } from 'semantic-ui-react';
 
-export default function HomePage(props) {
+import { setChosenVideo } from 'containers/App/actions';
+
+const mapStateToProps = () => ({});
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      push,
+      setChosenVideo,
+    },
+    dispatch,
+  );
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(function HomePage(props) {
   const [needToLogin, setNeedToLogin] = useState(false);
   const [videoList, setVideoList] = useState(null);
   const [chosenVideo, setChosenVideo] = useState(null);
@@ -53,6 +72,11 @@ export default function HomePage(props) {
           : `${path}/${video.fileName}`,
       );
     }
+    if (video.synced) {
+      props.setChosenVideo(video);
+      props.push('/video');
+      setChosenVideo(video.fileName);
+    }
   };
 
   return (
@@ -69,7 +93,9 @@ export default function HomePage(props) {
           </Table.Row>
           {(videoList || []).map(video => (
             <Table.Row>
-              <Table.Cell onClick={() => handleVideoClick(video)}>{video.fileName}</Table.Cell>
+              <Table.Cell onClick={() => handleVideoClick(video)}>
+                {video.fileName}
+              </Table.Cell>
               <Table.Cell>{video.type}</Table.Cell>
               <Table.Cell>{video.fileType}</Table.Cell>
               <Table.Cell>{video.size}</Table.Cell>
@@ -82,4 +108,4 @@ export default function HomePage(props) {
       <br />
     </div>
   );
-}
+});

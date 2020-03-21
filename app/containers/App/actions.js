@@ -15,7 +15,19 @@
  *    }
  */
 
-import { LOAD_REPOS, LOAD_REPOS_SUCCESS, LOAD_REPOS_ERROR } from './constants';
+import {
+  LOAD_REPOS,
+  LOAD_REPOS_SUCCESS,
+  LOAD_REPOS_ERROR,
+  SET_CHOSEN_VIDEO,
+} from './constants';
+
+export function setChosenVideo(video) {
+  return {
+    type: SET_CHOSEN_VIDEO,
+    video,
+  };
+}
 
 /**
  * Load the repositories, this action starts the request saga

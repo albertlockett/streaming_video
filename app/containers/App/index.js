@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { Switch, Route } from 'react-router-dom';
 
 import HomePage from 'containers/HomePageSemantic';
+import VideoPage from 'containers/VideoPage';
 
 import GlobalStyle from '../../global-styles';
 
@@ -28,6 +29,7 @@ export default function App() {
       </Helmet>
       <Switch>
         <Route exact path="/" component={HomePage} />
+        <Route exact path="/video" component={VideoPage} />
       </Switch>
       <GlobalStyle />
     </AppWrapper>
